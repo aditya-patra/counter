@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #9e9e9e;
+        }
+        .container {
+          width: 100%;
+          height: 100vh;
+          display: flex;
+        }
+        .left {
+            flex: 50%;
+            width: 50%;
+            height: 100vh;
+            margin: 100px;
+        }
+        .right {
+            flex: 50%;
+            width: 50%;
+            height: 100vh;
+            margin: 100px
+        }
+        button {
+            border: 4px solid blue;
+            border-radius: 10px;
+            background-color: #65b3fc;
+            box-shadow: 0 30px 40px rgba(0, 0, 0, 0.5);
+            width: 250px;
+            height: 50px;
+            font-variant: small-caps;
+            font-family: verdana;
+            font-size: 20px;
+            color: #38ffff;
+        }
+        .buttons {
+            width: 100%;
+            padding-top: 50px;
+        }
+        p {
+            font-variant: small-caps;
+            font-family: verdana;
+            font-size: 20px;
+            color: #38ffff;
+            padding-top: 10px;
+        }
+        h1 {
+            font-variant: small-caps;
+            font-family: verdana;
+            color: #38ffff;
+        }
+        h2 {
+            font-variant: small-caps;
+            font-family: verdana;
+            color: #38ffff;
+            font-size: 50px;
+        }
+        video {
+            border: 4px;
+            box-shadow: 0 30px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+            top: 300px;
+        }
+        #imgTag {
+            border-width: 4px solid blue;
+            box-shadow: 0 30px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+            top: 300px;
+        }
+        .large {
+            font-size: 80px;
+            text-align: right;
+        }
+        .cont {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+      <div class="left">
+          <div id="basic" style="text-align:center;">
+            <div class="heading">
+                <h1>
+                    <span class="large">¢</span>
+                    <span class="cont">ounter</span>
+                </h1>
+            </div>
+            <div class="buttons">
+              <button class="capture-button">capture</button>
+            </div>
+            <div class="buttons">
+              <button id="stop-button">stop</button>
+            </div>
+            <h2 class="Amt">d</h2>
+            <p class = "ans">d</p>
+          </div>
+      </div>
+      <div class="right" style="text-align: center;">
+          <video class="videostream" autoplay=""></video>
+          <audio class="audiostream" autoplay=""></audio>
+          <img id="imgTag">
+      </div>
+  </div>
+  <script>
+    const video = document.querySelector('.right video');
+    const audio = document.querySelector('.right audio');
+    const imgTag = document.querySelector('.right img');
+    const amt = document.querySelector('.Amt');
+    let canvas = document.createElement('canvas');
+    //canvas.setAttribute('id', 'canv');
+    canvas.width = 640;
+    canvas.height = 480;
+    let ctx = canvas.getContext('2d');
+
+    const captureVideoButton = document.querySelector('.capture-button');
+    const stopVideoButton = document.querySelector('#stop-button');
+    const ans = document.querySelector('#basic .ans');
+    const fileUpload = document.querySelector('.file-upload');
+    //Capture Video
+    captureVideoButton.onclick = function() {
+       imgTag.src = "";
+       navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true
+      })
+      .then(stream => {
+        window.localStream = stream;
+        video.srcObject = stream;
+        audio.srcObject = stream;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    };
+    stopVideoButton.onclick = function() {
+      ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
+      let image = canvas.toDataURL('image/jpeg');
+      alert(image);
+      //ans.innerHTML = image;
+      imgTag.src = image;
+      localStream.getVideoTracks()[0].stop();
+      video.src = '';
+
+      localStream.getAudioTracks()[0].stop();
+      audio.src = '';
+      $.ajax({
+        url: '/final_page',
+        type: 'POST',
+        data: JSON.stringify(image),
+        contentType: 'application/Json',
+        dataType: 'Json',
+        success: function(data){
+          amt.innerHTML = "Amount:";
+          ans.innerHTML = data;
+        },
+        error: function(error){
+          alert(error)
+        }
+      });
+    }
+  </script>
+</body>
+</html>
